@@ -6,6 +6,6 @@
     "express": "^4.2.0"
   },
   "scripts": {
-    "build": "mkdir -p dist && mv index.js dist"
+    "build": "mkdir -p dist && cp index.js dist"
   }
 }
