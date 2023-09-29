@@ -3,7 +3,7 @@ resources:
     type: GitRepo
     configuration:
       gitProvider: deepikaGithub
-      path: harshkumar1/demo_node_app
+      path: deepikasl/demo_node_app
       branches:
         include: {{gitBranch}}
       buildOn:
