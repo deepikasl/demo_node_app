@@ -115,7 +115,7 @@ pipelines:
           onExecute:
             - echo "DIT Deploy2"
     {{ end }}
-
+     {{ if eq "develop" "{{gitBranch}}" }}
       - name: UAT_Build
         type: Bash
         configuration:
@@ -140,9 +140,6 @@ pipelines:
         type: Bash
         configuration:
           inputSteps:
-            - name: Build_Check
-              status:
-                - success
             - name: UAT_Build
               status:
                 - success
@@ -160,3 +157,4 @@ pipelines:
         execution:
           onExecute:
             - echo "UAT Deploy2"
+    {{end}}
