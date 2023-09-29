@@ -71,6 +71,7 @@ pipelines:
           onExecute:
             - echo "Build Check"
 
+    {{ if eq "develop" "{{gitBranch}}" }}
       - name: DIT_Build
         type: Bash
         configuration:
@@ -90,6 +91,36 @@ pipelines:
             - popd
           onExecute:
             - echo "DIT Build"
+      - name: DIT_Deploy1
+        type: Bash
+        configuration:
+          inputSteps:
+            - name: Build_Check
+              status:
+                - success
+            - name: DIT_Build
+              status:
+                - success
+            - name: UAT_Build
+              status:
+                - success
+        execution:
+          onExecute:
+            - echo "DIT Deploy1"
+      - name: DIT_Deploy2
+        type: Bash
+        configuration:
+          inputSteps:
+            - name: DIT_Deploy1
+              status:
+                - success
+            - name: UAT_Deploy1
+              status:
+                - success
+        execution:
+          onExecute:
+            - echo "DIT Deploy2"
+    {{ end }}
 
       - name: UAT_Build
         type: Bash
@@ -111,23 +142,6 @@ pipelines:
           onExecute:
             - echo "UAT Build"
 
-      - name: DIT_Deploy1
-        type: Bash
-        configuration:
-          inputSteps:
-            - name: Build_Check
-              status:
-                - success
-            - name: DIT_Build
-              status:
-                - success
-            - name: UAT_Build
-              status:
-                - success
-        execution:
-          onExecute:
-            - echo "DIT Deploy1"
-
       - name: UAT_Deploy1
         type: Bash
         configuration:
@@ -144,20 +158,6 @@ pipelines:
         execution:
           onExecute:
             - echo "UAT Deploy1"
-
-      - name: DIT_Deploy2
-        type: Bash
-        configuration:
-          inputSteps:
-            - name: DIT_Deploy1
-              status:
-                - success
-            - name: UAT_Deploy1
-              status:
-                - success
-        execution:
-          onExecute:
-            - echo "DIT Deploy2"
 
       - name: UAT_Deploy2
         type: Bash
