@@ -1,0 +1,11 @@
+{
+  "name": "basic-nodejs-server",
+  "version": "1.0.0",
+  "description": "Basic nodejs server",
+  "dependencies": {
+    "express": "^4.2.0"
+  },
+  "scripts": {
+    "build": "mkdir -p dist && mv index.js dist"
+  }
+}
