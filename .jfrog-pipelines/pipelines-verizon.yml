@@ -32,6 +32,9 @@ pipelines:
             - popd
       - name: ESlintScan
         type: Bash
+        configuration:
+          inputSteps:
+            - name: node_setup
         execution:
           onStart:
             - pushd $res_gitlab_repo_res_resourcePath
