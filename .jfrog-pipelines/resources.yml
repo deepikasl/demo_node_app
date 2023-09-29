@@ -1,0 +1,8 @@
+resources:
+  - name: nodeRepo
+    type: GitRepo
+    configuration:
+      path: deepikasl/demo_node_app
+      gitProvider: deepikaGithub
+      branches:
+        include: {{gitBranch}}
