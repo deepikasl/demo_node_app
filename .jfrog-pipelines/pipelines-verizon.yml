@@ -115,7 +115,7 @@ pipelines:
           onExecute:
             - echo "DIT Deploy2"
     {{ end }}
-     {{ if eq "develop" "{{gitBranch}}" }}
+    {{ if eq "develop-uat" "{{gitBranch}}" }}
       - name: UAT_Build
         type: Bash
         configuration:
