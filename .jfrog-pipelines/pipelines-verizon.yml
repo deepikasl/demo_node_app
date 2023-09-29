@@ -101,9 +101,6 @@ pipelines:
             - name: DIT_Build
               status:
                 - success
-            - name: UAT_Build
-              status:
-                - success
         execution:
           onExecute:
             - echo "DIT Deploy1"
@@ -112,9 +109,6 @@ pipelines:
         configuration:
           inputSteps:
             - name: DIT_Deploy1
-              status:
-                - success
-            - name: UAT_Deploy1
               status:
                 - success
         execution:
@@ -149,9 +143,6 @@ pipelines:
             - name: Build_Check
               status:
                 - success
-            - name: DIT_Build
-              status:
-                - success
             - name: UAT_Build
               status:
                 - success
@@ -163,9 +154,6 @@ pipelines:
         type: Bash
         configuration:
           inputSteps:
-            - name: DIT_Deploy1
-              status:
-                - success
             - name: UAT_Deploy1
               status:
                 - success
