@@ -1,0 +1,171 @@
+resources:
+  - name: gitlab_repo_res
+    type: GitRepo
+    configuration:
+      gitProvider: deepikaGithub
+      path: harshkumar1/demo_node_app
+      branches:
+        include: {{gitBranch}}
+      buildOn:
+         commit: true
+         pullRequestCreate: true
+
+pipelines:
+  - name: app_build_pipeline
+    configuration:
+      inputResources:
+        - name: gitlab_repo_res
+    steps:
+      - name: node_setup
+        type: Bash
+        configuration:
+          integrations:
+            - name: deepika_art_entplus
+        execution:
+          onStart:
+            - npm config set registry "https://entplus.jfrog.io/artifactory/api/npm/npm-virtual"
+            - curl -u"${int_deepika_art_entplus_user}":"${int_deepika_art_entplus_apikey}" "https://entplus.jfrog.io/api/npm/auth" >> ~/.npmrc
+          onExecute:
+            - pushd $res_gitlab_repo_res_resourcePath 
+            - npm install
+            - add_pipeline_files node_modules repo_node_modules
+            - popd
+      - name: ESlintScan
+        type: Bash
+        execution:
+          onStart:
+            - pushd $res_gitlab_repo_res_resourcePath
+            - mkdir node_modules
+            - restore_pipeline_files repo_node_modules node_modules
+            - ls node_modules
+            - popd
+          onExecute:
+            - echo "ESlintScan"
+
+      - name: sonar_scan_col_dev
+        type: Bash
+        execution:
+          onExecute:
+            - echo "sonar-scan-col-dev"
+
+      - name: Build_Check
+        type: Bash
+        configuration:
+          inputSteps:
+            - name: ESlintScan
+              status:
+                - success
+            - name: sonar_scan_col_dev
+              status:
+                - success
+        execution:
+          onStart:
+            - pushd $res_gitlab_repo_res_resourcePath
+            - mkdir node_modules
+            - restore_pipeline_files repo_node_modules node_modules
+            - ls node_modules
+            - popd
+          onExecute:
+            - echo "Build Check"
+
+      - name: DIT_Build
+        type: Bash
+        configuration:
+          inputSteps:
+            - name: ESlintScan
+              status:
+                - success
+            - name: sonar_scan_col_dev
+              status:
+                - success
+        execution:
+          onStart:
+            - pushd $res_gitlab_repo_res_resourcePath
+            - mkdir node_modules
+            - restore_pipeline_files repo_node_modules node_modules
+            - ls node_modules
+            - popd
+          onExecute:
+            - echo "DIT Build"
+
+      - name: UAT_Build
+        type: Bash
+        configuration:
+          inputSteps:
+            - name: ESlintScan
+              status:
+                - success
+            - name: sonar_scan_col_dev
+              status:
+                - success
+        execution:
+          onStart:
+            - pushd $res_gitlab_repo_res_resourcePath
+            - mkdir node_modules
+            - restore_pipeline_files repo_node_modules node_modules
+            - ls node_modules
+            - popd
+          onExecute:
+            - echo "UAT Build"
+
+      - name: DIT_Deploy1
+        type: Bash
+        configuration:
+          inputSteps:
+            - name: Build_Check
+              status:
+                - success
+            - name: DIT_Build
+              status:
+                - success
+            - name: UAT_Build
+              status:
+                - success
+        execution:
+          onExecute:
+            - echo "DIT Deploy1"
+
+      - name: UAT_Deploy1
+        type: Bash
+        configuration:
+          inputSteps:
+            - name: Build_Check
+              status:
+                - success
+            - name: DIT_Build
+              status:
+                - success
+            - name: UAT_Build
+              status:
+                - success
+        execution:
+          onExecute:
+            - echo "UAT Deploy1"
+
+      - name: DIT_Deploy2
+        type: Bash
+        configuration:
+          inputSteps:
+            - name: DIT_Deploy1
+              status:
+                - success
+            - name: UAT_Deploy1
+              status:
+                - success
+        execution:
+          onExecute:
+            - echo "DIT Deploy2"
+
+      - name: UAT_Deploy2
+        type: Bash
+        configuration:
+          inputSteps:
+            - name: DIT_Deploy1
+              status:
+                - success
+            - name: UAT_Deploy1
+              status:
+                - success
+        execution:
+          onExecute:
+            - echo "UAT Deploy2"
