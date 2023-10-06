@@ -6,7 +6,6 @@ GitRepo:
 
 currentJpd:
   artifactoryIntegration: deepika_art
-  url: https://artifactory.com/artifactory/sde2.0_nextapp-npm-np
 
 npmConfig:
   artifactoryIntegration: deepika_art_entplus

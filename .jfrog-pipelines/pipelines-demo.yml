@@ -10,6 +10,9 @@ resources:
       buildOn:
          commit: true
          pullRequestCreate: true
+      cancelPendingRunsOn:
+        newCommit:         true
+        pullRequestUpdate: true
 
 pipelines:
   - name: app_build_pipeline
@@ -119,7 +122,7 @@ pipelines:
             - cd ./apps/workshop && cp -r storybook-static ../../Output/ && cd ../..
             - ls ./Output
             - tar -cvzf next-app.tar.gz Output
-            - jfrog rt upload --url={{ .Values.currentJpd.url }}/{{ .Values.DIT_Build.targetRepo }} next-app.tar.gz /${pipeline_id}/
+            - jfrog rt upload {{ .Values.DIT_Build.targetRepo }}/next-app.tar.gz /${pipeline_id}/
             - echo "Completed"
             - popd
 
@@ -192,7 +195,7 @@ pipelines:
             - cd ./apps/sde2-dashboard-1 && cp -r public ../../Output-nextapp-uat/ && cd ../..
             - ls ./Output-nextapp-uat
             - tar -cvzf next-app-uat.tar.gz Output-nextapp-uat
-            - jfrog rt upload --url={{ .Values.currentJpd.url }}/{{ .Values.UAT_Build.targetRepo }} next-app-uat.tar.gz /${pipeline_id}/
+            - jfrog rt upload {{ .Values.UAT_Build.targetRepo }}/next-app-uat.tar.gz /${pipeline_id}/
             - echo "Completed"
             - popd
 
