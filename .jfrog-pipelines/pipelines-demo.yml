@@ -228,4 +228,3 @@ pipelines:
         execution:
           onExecute:
             - echo "UAT Deploy2"
-    {{end}}
