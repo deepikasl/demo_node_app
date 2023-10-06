@@ -6,17 +6,14 @@ GitRepo:
 
 currentJpd:
   artifactoryIntegration: deepika_art
+  url: https://artifactory.com/artifactory/sde2.0_nextapp-npm-np
 
 npmConfig:
   artifactoryIntegration: deepika_art_entplus
   registryUrl: https://entplus.jfrog.io/artifactory/api/npm/npm-virtual
 
 DIT_Build:
-  artifactoryIntegration: deepika_art
-  url: https://artifactory.com/artifactory/sde2.0_nextapp-npm-np
   targetRepo: some-repo
 
 UAT_Build:
-  artifactoryIntegration: deepika_art
-  url: https://artifactory.com/artifactory/sde2.0_nextapp-npm-np
   targetRepo: some-repo

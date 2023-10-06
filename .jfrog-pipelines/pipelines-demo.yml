@@ -93,7 +93,7 @@ pipelines:
               status:
                 - success
           integrations:
-            - name: {{ .Values.DIT_Build.artifactoryIntegration }}
+            - name: {{ .Values.currentJpd.artifactoryIntegration }}
         execution:
           onStart:
             - pushd $res_gitlab_repo_res_resourcePath
@@ -119,7 +119,7 @@ pipelines:
             - cd ./apps/workshop && cp -r storybook-static ../../Output/ && cd ../..
             - ls ./Output
             - tar -cvzf next-app.tar.gz Output
-            - jfrog rt upload --url={{ .Values.DIT_Build.url }}/{{ .Values.DIT_Build.targetRepo }} next-app.tar.gz /${pipeline_id}/
+            - jfrog rt upload --url={{ .Values.currentJpd.url }}/{{ .Values.DIT_Build.targetRepo }} next-app.tar.gz /${pipeline_id}/
             - echo "Completed"
             - popd
 
@@ -134,7 +134,7 @@ pipelines:
               status:
                 - success
           integrations:
-            - name: {{ .Values.DIT_Build.artifactoryIntegration }}
+            - name: {{ .Values.currentJpd.artifactoryIntegration }}
         execution:
           onExecute:
             - echo "DIT Deploy1"
@@ -168,7 +168,7 @@ pipelines:
               status:
                 - success
           integrations:
-            - name: {{ .Values.UAT_Build.artifactoryIntegration }}
+            - name: {{ .Values.currentJpd.artifactoryIntegration }}
         execution:
           onStart:
             - pushd $res_gitlab_repo_res_resourcePath
@@ -192,7 +192,7 @@ pipelines:
             - cd ./apps/sde2-dashboard-1 && cp -r public ../../Output-nextapp-uat/ && cd ../..
             - ls ./Output-nextapp-uat
             - tar -cvzf next-app-uat.tar.gz Output-nextapp-uat
-            - jfrog rt upload --url={{ .Values.UAT_Build.url }}/{{ .Values.UAT_Build.targetRepo }} next-app-uat.tar.gz /${pipeline_id}/
+            - jfrog rt upload --url={{ .Values.currentJpd.url }}/{{ .Values.UAT_Build.targetRepo }} next-app-uat.tar.gz /${pipeline_id}/
             - echo "Completed"
             - popd
 
@@ -204,7 +204,7 @@ pipelines:
               status:
                 - success
           integrations:
-            - name: {{ .Values.UAT_Build.artifactoryIntegration }}
+            - name: {{ .Values.currentJpd.artifactoryIntegration }}
         execution:
           onExecute:
             - echo "UAT Deploy1"
