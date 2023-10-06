@@ -1,11 +1,12 @@
+valuesFilePath: ./values.yml
 resources:
   - name: gitlab_repo_res
     type: GitRepo
     configuration:
-      gitProvider: deepikaGithub
-      path: deepikasl/demo_node_app
+      gitProvider: {{ .Values.GitRepo.gitProvider }}
+      path: {{ .Values.GitRepo.path }}
       branches:
-        include: {{gitBranch}}
+        include: {{ .Values.GitRepo.branches.include }}
       buildOn:
          commit: true
          pullRequestCreate: true
@@ -20,11 +21,10 @@ pipelines:
         type: Bash
         configuration:
           integrations:
-            - name: deepika_art_entplus
+            - name: {{ .Values.npmConfig.artifactoryIntegration }}
         execution:
           onStart:
-            - npm config set registry "https://entplus.jfrog.io/artifactory/api/npm/npm-virtual"
-            - curl -u"${int_deepika_art_entplus_user}":"${int_deepika_art_entplus_apikey}" "https://entplus.jfrog.io/api/npm/auth" >> ~/.npmrc
+            - npm config set registry "{{ .Values.npmConfig.registryUrl }}"
           onExecute:
             - pushd $res_gitlab_repo_res_resourcePath 
             - npm install
@@ -41,9 +41,10 @@ pipelines:
             - mkdir node_modules
             - restore_pipeline_files repo_node_modules node_modules
             - ls node_modules
-            - popd
           onExecute:
             - echo "ESlintScan"
+            - npm run lint
+            - popd
 
       - name: sonar_scan_col_dev
         type: Bash
@@ -67,11 +68,20 @@ pipelines:
             - mkdir node_modules
             - restore_pipeline_files repo_node_modules node_modules
             - ls node_modules
-            - popd
           onExecute:
             - echo "Build Check"
+            - echo "running build - ${step_id}"
+            - mkdir -p Output
+            - git status
+            - git tag -l
+            - pwd
+            - ls -lrta
+            - npx next telemetry disable
+            - export NODE_OPTIONS="--max-old-space-size=8192"
+            - npm run build:dev
+            - echo "Completed"
+            - popd
 
-    {{ if eq "develop" "{{gitBranch}}" }}
       - name: DIT_Build
         type: Bash
         configuration:
@@ -82,15 +92,37 @@ pipelines:
             - name: sonar_scan_col_dev
               status:
                 - success
+          integrations:
+            - {{ .Values.DIT_Build.artifactoryIntegration }}
         execution:
           onStart:
             - pushd $res_gitlab_repo_res_resourcePath
             - mkdir node_modules
             - restore_pipeline_files repo_node_modules node_modules
             - ls node_modules
-            - popd
           onExecute:
             - echo "DIT Build"
+            - echo "running build - ${step_id}"
+            - mkdir -p Output
+            - git status
+            - git tag -l
+            - pwd
+            - ls -lrta
+            - npx next telemetry disable
+            - export NODE_OPTIONS="--max-old-space-size=8192"
+            - npm run build:dev
+            - cp -r ./apps/sde2-dashboard-1/.next/standalone/apps/sde2-dashboard-1/. ./Output
+            - cd ./apps/sde2-dashboard-1/.next/standalone && cp -r ./node_modules ../../../../Output/ && cp -r ./package.json ../../../../Output/ && cd ../../../..
+            - mkdir -p ./Output/.next/static
+            - cd ./apps/sde2-dashboard-1/.next && cp -r ./static/. ../../../Output/.next/static && cd ../../..
+            - cd ./apps/sde2-dashboard-1 && cp -r public ../../Output/ && cd ../..
+            - cd ./apps/workshop && cp -r storybook-static ../../Output/ && cd ../..
+            - ls ./Output
+            - tar -cvzf next-app.tar.gz Output
+            - jfrog rt upload --url={{ .Values.DIT_Build.url }}/{{ .Values.DIT_Build.targetRepo }} next-app.tar.gz /${pipeline_id}/
+            - echo "Completed"
+            - popd
+
       - name: DIT_Deploy1
         type: Bash
         configuration:
@@ -101,9 +133,20 @@ pipelines:
             - name: DIT_Build
               status:
                 - success
+          integrations:
+            - {{ .Values.DIT_Build.artifactoryIntegration }}
         execution:
           onExecute:
             - echo "DIT Deploy1"
+            - echo "Deploy to ec2"
+            - pushd $res_gitlab_repo_res_resourcePath
+            - jfrog rt download {{ .Values.DIT_Build.targetRepo }}/next-app.tar.gz
+            - cp -r next-app.tar.gz ./apps/opt/UI-deploy_output
+            - cd ./apps/opt/UI-deploy_output
+            - rm -rf Output
+            - tar -xvzf next-app.tar.gz
+            - echo "Deployed to ec2 completed"
+            - popd
       - name: DIT_Deploy2
         type: Bash
         configuration:
@@ -114,8 +157,6 @@ pipelines:
         execution:
           onExecute:
             - echo "DIT Deploy2"
-    {{ end }}
-    {{ if eq "develop-uat" "{{gitBranch}}" }}
       - name: UAT_Build
         type: Bash
         configuration:
@@ -126,15 +167,34 @@ pipelines:
             - name: sonar_scan_col_dev
               status:
                 - success
+          integrations:
+            - {{ .Values.UAT_Build.artifactoryIntegration }}
         execution:
           onStart:
             - pushd $res_gitlab_repo_res_resourcePath
             - mkdir node_modules
             - restore_pipeline_files repo_node_modules node_modules
             - ls node_modules
-            - popd
           onExecute:
             - echo "UAT Build"
+            - echo "running build - ${step_id}"
+            - mkdir -p Output-nextapp-uat
+            - git status
+            - git tag -l
+            - pwd
+            - ls -lrta
+            - npx next telemetry disable
+            - npm run build
+            - cp -r ./apps/sde2-dashboard-1/.next/standalone/apps/sde2-dashboard-1/. ./Output-nextapp-uat
+            - cd ./apps/sde2-dashboard-1/.next/standalone && cp -r ./node_modules ../../../../Output-nextapp-uat/ && cp -r ./package.json ../../../../Output-nextapp-uat/ && cd ../../../..
+            - mkdir -p ./Output-nextapp-uat/.next/static
+            - cd ./apps/sde2-dashboard-1/.next && cp -r ./static/. ../../../Output-nextapp-uat/.next/static && cd ../../..
+            - cd ./apps/sde2-dashboard-1 && cp -r public ../../Output-nextapp-uat/ && cd ../..
+            - ls ./Output-nextapp-uat
+            - tar -cvzf next-app-uat.tar.gz Output-nextapp-uat
+            - jfrog rt upload --url={{ .Values.UAT_Build.url }}/{{ .Values.UAT_Build.targetRepo }} next-app-uat.tar.gz /${pipeline_id}/
+            - echo "Completed"
+            - popd
 
       - name: UAT_Deploy1
         type: Bash
@@ -143,9 +203,20 @@ pipelines:
             - name: UAT_Build
               status:
                 - success
+          integrations:
+            - {{ .Values.UAT_Build.artifactoryIntegration }}
         execution:
           onExecute:
             - echo "UAT Deploy1"
+            - echo "Deploy to ec2"
+            - pushd $res_gitlab_repo_res_resourcePath
+            - jfrog rt download {{ .Values.UAT_Build.targetRepo }}/next-app-uat.tar.gz
+            - cp -r next-app-uat.tar.gz ./apps/opt/UI-deploy_output
+            - cd ./apps/opt/UI-deploy_output
+            - rm -rf Output-nextapp-uat
+            - tar -xvzf next-app-uat.tar.gz
+            - echo "Deployed to ec2 completed"
+            - popd
 
       - name: UAT_Deploy2
         type: Bash
