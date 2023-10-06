@@ -93,7 +93,7 @@ pipelines:
               status:
                 - success
           integrations:
-            - {{ .Values.DIT_Build.artifactoryIntegration }}
+            - name: {{ .Values.DIT_Build.artifactoryIntegration }}
         execution:
           onStart:
             - pushd $res_gitlab_repo_res_resourcePath
@@ -134,7 +134,7 @@ pipelines:
               status:
                 - success
           integrations:
-            - {{ .Values.DIT_Build.artifactoryIntegration }}
+            - name: {{ .Values.DIT_Build.artifactoryIntegration }}
         execution:
           onExecute:
             - echo "DIT Deploy1"
@@ -168,7 +168,7 @@ pipelines:
               status:
                 - success
           integrations:
-            - {{ .Values.UAT_Build.artifactoryIntegration }}
+            - name: {{ .Values.UAT_Build.artifactoryIntegration }}
         execution:
           onStart:
             - pushd $res_gitlab_repo_res_resourcePath
@@ -204,7 +204,7 @@ pipelines:
               status:
                 - success
           integrations:
-            - {{ .Values.UAT_Build.artifactoryIntegration }}
+            - name: {{ .Values.UAT_Build.artifactoryIntegration }}
         execution:
           onExecute:
             - echo "UAT Deploy1"
