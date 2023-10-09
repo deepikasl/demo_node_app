@@ -19,6 +19,7 @@ pipelines:
     configuration:
       inputResources:
         - name: gitlab_repo_res
+      affinityGroup: node_app
     steps:
       - name: node_setup
         type: Bash
@@ -31,8 +32,10 @@ pipelines:
           onExecute:
             - pushd $res_gitlab_repo_res_resourcePath 
             - npm install
-            - add_pipeline_files node_modules repo_node_modules
+            - mkdir -p $shared_workspace/repo/node_modules
+            - mv ./node_modules $shared_workspace/repo/node_modules
             - popd
+
       - name: ESlintScan
         type: Bash
         configuration:
@@ -41,8 +44,7 @@ pipelines:
         execution:
           onStart:
             - pushd $res_gitlab_repo_res_resourcePath
-            - mkdir node_modules
-            - restore_pipeline_files repo_node_modules node_modules
+            - mv $shared_workspace/repo/node_modules .
             - ls node_modules
           onExecute:
             - echo "ESlintScan"
@@ -68,8 +70,7 @@ pipelines:
         execution:
           onStart:
             - pushd $res_gitlab_repo_res_resourcePath
-            - mkdir node_modules
-            - restore_pipeline_files repo_node_modules node_modules
+            - mv $shared_workspace/repo/node_modules .
             - ls node_modules
           onExecute:
             - echo "Build Check"
@@ -100,8 +101,7 @@ pipelines:
         execution:
           onStart:
             - pushd $res_gitlab_repo_res_resourcePath
-            - mkdir node_modules
-            - restore_pipeline_files repo_node_modules node_modules
+            - mv $shared_workspace/repo/node_modules .
             - ls node_modules
           onExecute:
             - echo "DIT Build"
@@ -175,8 +175,7 @@ pipelines:
         execution:
           onStart:
             - pushd $res_gitlab_repo_res_resourcePath
-            - mkdir node_modules
-            - restore_pipeline_files repo_node_modules node_modules
+            - mv $shared_workspace/repo/node_modules .
             - ls node_modules
           onExecute:
             - echo "UAT Build"
