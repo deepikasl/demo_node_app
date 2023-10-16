@@ -7,5 +7,6 @@
   },
   "scripts": {
     "build": "mkdir -p dist && cp index.js dist"
+    "build:dev": "mkdir -p dist && cp index.js dist"
   }
 }
